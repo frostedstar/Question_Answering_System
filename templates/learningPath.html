@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Graph 渲染示例{% endblock %}
+
+{% block extra_css %}
+  <style>
+    .mermaid {
+      width: 100%;
+      height: 500px;  /* 可以调整高度来适应你的需求 */
+      min-height: 500px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <h2>学习路径</h2>
+
+  <!-- Mermaid 图表容器 -->
+  <div class="mermaid">
+    {{ htmlContent|safe }}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    // 延迟 Mermaid 初始化，确保页面完全加载
+    document.addEventListener("DOMContentLoaded", function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'base',
+        flowchart: {
+          curve: 'linear',
+          nodeSpacing: 50,
+          rankSpacing: 100,
+          direction: 'LR'   // 设置横向排列：从左到右（Left to Right）
+        }
+      });
+    });
+  </script>
+{% endblock %}

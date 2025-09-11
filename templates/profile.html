@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+
+{% block title %}用户信息{% endblock %}
+{% block content %}
+    <div class="container">
+        <h2 class="section-title">用户信息</h2>
+
+        <div class="info-item">
+            <label>用户名：</label>
+            <div class="info-content">
+                <span id="username">{{ user_info.userName }}</span>
+                <button class="password-button" onclick="openModal('username', '{{ user_info.userName }}')">修改</button>
+            </div>
+        </div>
+
+        <div class="info-item">
+            <label>学号：</label>
+            <div class="info-content">
+                <span>{{ user_info.studentId }}</span>
+            </div>
+        </div>
+
+        <div class="info-item">
+            <label>邮箱地址：</label>
+            <div class="info-content">
+                <span id="email">{{ user_info.email }}</span>
+                <button class="password-button" onclick="openModal('email', '{{ user_info.email }}')">修改</button>
+            </div>
+        </div>
+
+        <div class="password-btn-wrapper">
+            <button class="password-button" onclick="openPasswordModal()">修改密码</button>
+        </div>
+    </div>
+
+    <!-- 普通字段修改弹窗 -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-title">修改信息</h3>
+            <input type="text" id="modal-input">
+            <div class="error-message" id="modal-error"></div>
+            <div class="modal-buttons">
+                <button onclick="submitChange()">确认</button>
+                <button onclick="closeModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改密码弹窗 -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content">
+            <h3>修改密码</h3>
+            <input type="text" id="old-password" placeholder="原密码">
+            <input type="text" id="new-password" placeholder="新密码">
+            <input type="text" id="confirm-password" placeholder="确认新密码">
+            <div class="error-message" id="password-error"></div>
+            <div class="modal-buttons">
+                <button onclick="submitPasswordChange()">确认</button>
+                <button onclick="closePasswordModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentField = "";
+
+        function openModal(field, currentValue) {
+            currentField = field;
+            document.getElementById("modal-title").innerText = "修改 " + getFieldName(field);
+            document.getElementById("modal-input").value = currentValue;
+            document.getElementById("modal-error").innerText = "";
+            document.getElementById("modal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("modal").style.display = "none";
+        }
+
+        function openPasswordModal() {
+            document.getElementById("old-password").value = "";
+            document.getElementById("new-password").value = "";
+            document.getElementById("confirm-password").value = "";
+            document.getElementById("password-error").innerText = "";
+            document.getElementById("password-modal").style.display = "block";
+        }
+
+        function closePasswordModal() {
+            document.getElementById("password-modal").style.display = "none";
+        }
+
+        function getFieldName(field) {
+            const map = {
+                "username": "用户名",
+                "password": "密码",
+                "email": "邮箱地址"
+            };
+            return map[field] || field;
+        }
+
+        function submitChange() {
+            const value = document.getElementById("modal-input").value;
+            fetch("/update_info/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                    field: currentField,
+                    value: value
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (currentField !== "password") {
+                        document.getElementById(currentField).innerText = value;
+                    }
+                    closeModal();
+                } else {
+                    document.getElementById("modal-error").innerText = data.error;
+                }
+            });
+        }
+
+        function submitPasswordChange() {
+            const oldPassword = document.getElementById("old-password").value;
+            const newPassword = document.getElementById("new-password").value;
+            const confirmPassword = document.getElementById("confirm-password").value;
+
+            fetch("/update_password/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                    current_password: oldPassword,
+                    new_password: newPassword,
+                    confirm_password: confirmPassword
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closePasswordModal();
+                } else {
+                    document.getElementById("password-error").innerText = data.error;
+                }
+            });
+        }
+    </script>
+{% endblock %}
+
+

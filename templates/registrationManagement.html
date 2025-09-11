@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/registrationManagement.css' %}">
+{% endblock %}
+{% block title %}用户管理{% endblock %}
+
+{% block content %}
+
+    <div class="admin-container">
+        <h2>用户审核</h2>
+
+        <form method="get" class="per-page-form">
+            每页显示：
+            <select name="per_page" onchange="this.form.submit()">
+                {% for option in per_page_options %}
+                    <option value="{{ option }}" {% if per_page == option %}selected{% endif %}>{{ option }}</option>
+                {% endfor %}
+            </select> 个用户
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>用户名</th>
+                    <th>学号</th>
+                    <th>邮箱地址</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in page_users %}
+                <tr>
+                    <td>{{ user.user_name }}</td>
+                    <td>{{ user.student_id }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <form action="{% url 'registrationApprove' user.user_id %}" method="post" style="display:inline;" id="submitButton">{% csrf_token %}
+                            <button type="submit">通过申请</button>
+                        </form>
+                        <form action="{% url 'registrationDeny' user.user_id %}" method="post" style="display:inline;" onsubmit="return confirm('确认删除该用户？');">{% csrf_token %}
+                            <button type="submit" class="delete-btn">拒绝申请</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5">暂无用户</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            {% if page_number > 1 %}
+                <a href="?page=1&per_page={{ per_page }}">首页</a>
+                <a href="?page={{ page_number|add:'-1' }}&per_page={{ per_page }}">上一页</a>
+            {% endif %}
+
+            <span>第 {{ page_number }} 页 / 共 {{ total_pages }} 页</span>
+
+            {% if page_number < total_pages %}
+                <a href="?page={{ page_number|add:'1' }}&per_page={{ per_page }}">下一页</a>
+                <a href="?page={{ total_pages }}&per_page={{ per_page }}">尾页</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // 这两个函数就是实现弹窗功能的函数，fetch函数向后端目标函数的url发请求！！！，同时记得改css,添加confirm-popup-message，confirm-popup相关的css内容
+
+        function showPopup(type, text) {
+            let popup = document.getElementById("confirm-popup-message");
+            if (!popup) {
+                popup = document.createElement("div");
+                popup.id = "confirm-popup-message";
+                document.body.appendChild(popup);
+            }
+            popup.innerHTML = `<div class="confirm-popup ${type}">${text}</div>`;
+            popup.style.opacity = "1";
+            setTimeout(() => {
+                popup.style.opacity = "0";
+                setTimeout(() => popup.remove(), 500);
+            }, 300000);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById("submitButton");
+            form.addEventListener("submit", function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+                const url = form.action;
+                showPopup("info", "请等待，正在发送邮件中，请勿关闭或刷新界面");
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {"X-CSRFToken": formData.get("csrfmiddlewaretoken")},
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    // 清空旧错误
+                    document.querySelectorAll(".error").forEach(div => div.innerHTML = "");
+                    console.log(data.redirect_url)
+                    if (data.success) {
+                        setTimeout(() => {
+                            showPopup("success", data.message);
+                            setTimeout(() => {
+                                window.location.href = data.redirect_url;
+                            }, 2000);
+                        }, 1000);
+                    }
+                    else {
+                        setTimeout(() => {
+                            showPopup("error", data.errors)
+                        }, 1000);
+
+                    }
+                });
+            });
+        });
+
+
+
+    </script>
+{% endblock %}    
+
+
+

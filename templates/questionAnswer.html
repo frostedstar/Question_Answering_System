@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block extra_css %}
+    <!-- 引入页面特定CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock %}
+{% block title %}AI问答系统{% endblock %}
+{% block content %}
+<div class="main-container">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="logo">Sora</div>
+            <nav>
+                <ul>
+                    <li>新聊天</li>
+                    <li>搜索聊天</li>
+                    <li>库</li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- 主体内容 -->
+        <div class="content">
+            <header class="header">
+                <h1>ChatGPT</h1>
+                <!--<button class="plus-btn">{{ userInformation.userName }}</button>-->
+                <!--<a href="/profile" class="plus-btn">{{ userInformation.userName }}</a>-->
+            </header>
+
+            <!-- 聊天区 -->
+            <div class="chat-box">
+                <div class="chat-window">
+                    <div class="message-container" id="message-container">
+
+                        <!-- 之前的问答内容 -->
+                        {% for questionAnswer in questionAnswers %}
+                        <div class="message user-message">
+                            <p><strong>{{ userInformation.userName }}:</strong>{{ questionAnswer.questionContent }}</p>
+                        </div>
+                        <div class="message ai-message">
+                            <p><strong>AI：</strong>{{ questionAnswer.systemAnswer|safe }}</p>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+
+                <!-- 输入框 -->
+                <form method="post" class="input-box" id="question-form">
+                    {% csrf_token %}
+                    <input type="text" name="questionContent" placeholder="请输入您的问题..." required id="question-input">
+                    <button type="submit">提问</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<script>
+    function scrollToBottom() {
+        var chatWindow = document.querySelector(".chat-window");
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    window.onload = function() {
+        scrollToBottom();
+    };
+
+    $("#question-form").submit(function(event) {
+        event.preventDefault();
+
+        var questionContent = $("#question-input").val();
+
+        $.ajax({
+            type: "POST",
+            url: "",
+            data: {
+                csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val(),
+                questionContent: questionContent
+            },
+            success: function(response) {
+                var newMessage = `
+                    <div class="message user-message">
+                        <p><strong>{{ userInformation.userName }}:</strong>` + questionContent + `</p>
+                    </div>
+                    <div class="message ai-message">
+                        <p><strong>AI：</strong>` + response.answer + `</p>
+                    </div>
+                `;
+                $("#message-container").append(newMessage);
+                $("#question-input").val("");
+                scrollToBottom();  // 自动滚动到底部
+            },
+            error: function() {
+                alert("发生错误，请稍后再试！");
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+
+
+
+

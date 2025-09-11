@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}默认标题{% endblock %}</title>
+    <style>
+        /* 基础命名空间 */
+        .base-app {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            /* background-color: #f5f5f5; */
+            color: #333;
+            min-height: 100vh; /* 让整个区域至少和视口等高 */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 导航栏样式 - 现在限定在.base-app下 */
+        .base-app .navbar {
+            position: fixed;  /* 新增 */
+            top: 0;          /* 新增 */
+            left: 0;         /* 新增 */
+            width: 100%;     /* 新增 */
+            z-index: 1000;   /* 新增 - 确保导航栏在最上层 */
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .base-app .nav-buttons {
+            display: flex;
+            gap: 15px;
+            box-sizing: border-box;
+        }
+
+        .base-app .nav-button {
+            background-color: transparent;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 8px 16px;
+            color: #495057;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .base-app .nav-button:hover {
+            background-color: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        /* 内容区域 - 限定在.base-app下 */
+        /* .base-app .content { */
+            /* padding: 20px; */
+            /* flex: 1
+        } */
+
+        .base-app .content {
+            flex: 1;
+            padding-top: 60px; /* 避开固定导航栏的高度 */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* 顶部对齐 */
+            min-height: calc(100vh - 60px); /* 视口高度减去导航栏高度 */
+            box-sizing: border-box;
+        }
+
+        /* 弹窗样式 - 限定在.base-app下 */
+        .base-app .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .base-app .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            border-radius: 4px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .base-app .modal-actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .base-app .confirm-btn,
+        .base-app .cancel-btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .base-app .confirm-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .base-app .confirm-btn:hover {
+            background-color: #c82333;
+        }
+
+        .base-app .cancel-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .base-app .cancel-btn:hover {
+            background-color: #5a6268;
+        }
+
+
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+
+        #confirm-popup-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .confirm-popup {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .confirm-popup.error { background-color: #f44336; }
+        .confirm-popup.info { background-color: #2196F3; }
+    </style>
+    <!-- 预留CSS扩展块 -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="base-app">
+    <!-- 导航栏 -->
+    <div class="navbar">
+        <div class="site-name">AI问答系统</div>
+        <div class="nav-buttons">
+            {% if request.session.type == 'student' %}
+                <a href="{% url 'index' %}" class="nav-button">主页</a>
+                <a href="{% url 'learningPath' %}" onclick="baseShowPopup('success', '正在生成学习路径，生成时间与提问记录长度有关，请耐心等待')" class="nav-button">学习路径可视化</a>
+                <a href="{% url 'wordCloud' %}" class="nav-button">词云分析</a>
+                <a href="{% url 'studyReport' %}" class="nav-button">学习分析报告</a>
+            {% endif %}
+            {% if request.session.type == 'manager' %}
+                <a href="{% url 'userManagement' %}" class="nav-button">用户管理</a>
+                <a href="{% url 'registrationManagement' %}" class="nav-button">用户审核</a>
+            {% endif %}
+            <a href="{% url 'profile' %}" class="nav-button">个人中心</a>
+            <button id="logoutBtn" class="nav-button">退出登录</button>
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="content">
+        {% block content %}
+        <!-- 子模板内容将在这里插入 -->
+        {% endblock %}
+
+    </div>
+
+
+
+
+    <!-- 退出登录确认弹窗 -->
+    <div id="logoutModal" class="modal">
+        <div class="modal-content">
+            <p>确定要退出登录吗？</p>
+            <div class="modal-actions">
+                <button id="confirmLogout" class="confirm-btn">确定</button>
+                <button id="cancelLogout" class="cancel-btn">取消</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const logoutBtn = document.getElementById('logoutBtn');
+        const logoutModal = document.getElementById('logoutModal');
+        const confirmLogout = document.getElementById('confirmLogout');
+        const cancelLogout = document.getElementById('cancelLogout');
+
+        // 点击退出按钮显示弹窗
+        logoutBtn.addEventListener('click', function() {
+            logoutModal.style.display = 'block';
+        });
+
+        // 点击确定按钮跳转到登录页面
+        confirmLogout.addEventListener('click', function() {
+            window.location.href = "{% url 'login' %}";
+        });
+
+        // 点击取消按钮关闭弹窗
+        cancelLogout.addEventListener('click', function() {
+            logoutModal.style.display = 'none';
+        });
+
+        // 点击弹窗外部关闭弹窗
+        window.addEventListener('click', function(event) {
+            if (event.target === logoutModal) {
+                logoutModal.style.display = 'none';
+            }
+        });
+
+
+        // 这两个函数就是实现弹窗功能的函数，fetch函数向后端目标函数的url发请求！！！，同时记得改css,添加confirm-popup-message，confirm-popup相关的css内容
+
+        function baseShowPopup(type, text) {
+            let popup = document.getElementById("confirm-popup-message");
+            if (!popup) {
+                popup = document.createElement("div");
+                popup.id = "confirm-popup-message";
+                document.body.appendChild(popup);
+            }
+            popup.innerHTML = `<div class="confirm-popup ${type}">${text}</div>`;
+            popup.style.opacity = "1";
+            setTimeout(() => {
+                popup.style.opacity = "0";
+                setTimeout(() => popup.remove(), 500);
+            }, 60000);
+        }
+    </script>
+
+</body>
+</html>

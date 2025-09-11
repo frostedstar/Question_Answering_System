@@ -1,0 +1,148 @@
+/* 页面背景：以 #f4f6f8 为基色的渐变 */
+body {
+    font-family: 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #f4f6f8, #dfe4e8);
+    margin: 0;
+    /* padding: 20px; */
+}
+
+/* 容器卡片 */
+/* .admin-container {
+    max-width: 1000px; */
+    /* margin: 30px auto; */
+    /* margin: 0px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    animation: fadeIn 0.5s ease-in-out;
+} */
+
+.admin-container {
+    max-width: 1000px;
+    width: 90%; /* 增加响应式宽度 */
+    margin: 0 auto; /* 水平居中 */
+    background: #fff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    animation: fadeIn 0.5s ease-in-out;
+    margin-top: 30px;
+}
+
+/* 标题 */
+h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #4f5b5c;
+    font-weight: 600;
+}
+
+/* 每页选择 */
+.per-page-form {
+    margin-bottom: 20px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 表格 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th, td {
+    border: 1px solid #e2e6ea;
+    padding: 12px 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+th {
+    background-color: #eef1f3;
+    font-weight: 600;
+    color: #555;
+}
+
+/* 下拉框 */
+select {
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    transition: all 0.3s ease;
+}
+
+select:focus {
+    border-color: #78ABAF;
+    box-shadow: 0 0 5px rgba(120,171,175,0.4);
+    outline: none;
+}
+
+/* 按钮 */
+button {
+    padding: 6px 12px;
+    font-size: 14px;
+    margin: 0 2px;
+    /* background: linear-gradient(135deg, #78ABAF, #5D8696); */
+    background:#78ABAF;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    /* background: linear-gradient(135deg, #689ba0, #4f7583); */
+    background:#689ba0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.delete-btn {
+    /* background: linear-gradient(135deg, #d9534f, #c9302c); */
+    background:#d9534f;
+
+}
+
+.delete-btn:hover {
+    /* background: linear-gradient(135deg, #c9302c, #a52824); */
+    background:#c9302c;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+}
+
+/* 分页 */
+.pagination {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.pagination a {
+    margin: 0 8px;
+    text-decoration: none;
+    color: #5D8696;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.pagination a:hover {
+    background-color: rgba(93,134,150,0.1);
+}
+
+.pagination span {
+    font-weight: bold;
+    color: #333;
+}
+
+/* 进入动画 */
+/* @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+} */

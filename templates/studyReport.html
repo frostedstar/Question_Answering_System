@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block extra_css %}
+<!-- 引入页面特定CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/styles/default.min.css">
+<style>
+    body { font-family: system-ui, sans-serif; padding: 20px; max-width: 1000px; margin: auto; }
+    textarea { width: 100%; height: 200px; font-family: monospace; margin-bottom: 10px; }
+    .preview {
+        border: 1px solid #ccc;
+        padding: 20px;
+        background: #fafafa;
+        width: 100%;
+        margin: 0 auto;
+        box-sizing: border-box;
+        min-height: 300px; /* 添加最小高度 */
+    }
+    pre { background: #f0f0f0; padding: 10px; border-radius: 6px; overflow-x: auto; }
+
+    /* 新增表格样式 */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    .report-form-container {
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 25px;
+        margin: 20px 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+    }
+
+    .form-header {
+        color: #2c3e50;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #4CAF50;
+    }
+
+    .form-group {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #2c3e50;
+        font-size: 14px;
+        min-width: 100px;
+    }
+
+    .form-select {
+        padding: 10px 15px;
+        border: 1px solid #dce6f0;
+        border-radius: 5px;
+        background: #f8fafc;
+        font-size: 14px;
+        min-width: 200px;
+        color: #2c3e50;
+        transition: all 0.3s ease;
+    }
+
+    .form-select:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        background: #ffffff;
+    }
+
+    .submit-btn {
+        background: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .submit-btn:hover {
+        background: #45a049;
+        transform: translateY(-1px);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+        background: #cccccc;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* 加载动画 */
+    .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #4CAF50;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 576px) {
+        .form-group {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .form-label {
+            margin-bottom: 5px;
+        }
+
+        .form-select {
+            min-width: 100%;
+        }
+
+        .submit-btn {
+            width: 100%;
+            margin-top: 10px;
+        }
+    }
+
+    .content-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        align-items: center;
+    }
+</style>
+{% endblock %}
+
+{% block title %}学习分析报告{% endblock %}
+
+{% block content %}
+<div class="content-layout">
+    <div class="report-form-container">
+        <div class="form-header">当前报告的生成时间：<span id="current-report-time">{{ selectedStudyReportTime }}</span></div>
+        <form id="report-form">
+            {% csrf_token %}
+            <div class="form-group">
+                {% if request.session.type == 'student' %}
+                <a href="{% url 'createStudyReport' %}" class="submit-btn" onclick="baseShowPopup('success', '正在生成分析报告，请耐心等待')" style="text-decoration: none;">生成分析报告</a>
+                {% endif %}
+                <select name="selectedId" id="timeSelect" class="form-select">
+                    <option value="">-- 查看分析报告 --</option>
+                    {% for studyReportTime in studyReportTimes %}
+                        <option value="{{ studyReportTime.id }}" {% if studyReportTime.id == current_report_id %}selected{% endif %}>
+                            {{ studyReportTime.studyReportTime }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <button type="button" id="view-btn" class="submit-btn">
+                    <span id="btn-text">查看</span>
+                    <span id="btn-loading" class="loading" style="display: none;"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="preview" id="report-content">
+        {{ studyReportContent|safe }}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/lib/common.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const viewBtn = document.getElementById('view-btn');
+        const timeSelect = document.getElementById('timeSelect');
+        const reportContent = document.getElementById('report-content');
+        const currentReportTime = document.getElementById('current-report-time');
+        const btnText = document.getElementById('btn-text');
+        const btnLoading = document.getElementById('btn-loading');
+
+        // 获取CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        viewBtn.addEventListener('click', function() {
+            const reportId = timeSelect.value;
+            if (!reportId) {
+                alert('请选择一个报告');
+                return;
+            }
+
+            // 显示加载状态
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline-block';
+            viewBtn.disabled = true;
+
+            // 发送AJAX请求
+            fetch('{% url "get_study_report_ajax" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrftoken
+                },
+                body: new URLSearchParams({
+                    'reportId': reportId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // 更新报告内容
+                    reportContent.innerHTML = data.studyReportContent;
+                    currentReportTime.textContent = data.selectedStudyReportTime;
+
+                    // 重新高亮代码
+                    document.querySelectorAll('pre code').forEach((block) => {
+                        hljs.highlightElement(block);
+                    });
+                } else {
+                    alert('获取报告失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('网络错误，请重试');
+            })
+            .finally(() => {
+                // 恢复按钮状态
+                btnText.style.display = 'inline-block';
+                btnLoading.style.display = 'none';
+                viewBtn.disabled = false;
+            });
+        });
+
+        // 初始高亮代码
+        document.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightElement(block);
+        });
+    });
+</script>
+{% endblock %}

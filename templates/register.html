@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/register.css' %}">
+    <script>
+        function toggleVisibility(inputId, toggleElement) {
+            const input = document.getElementById(inputId);
+            const svg = toggleElement.querySelector("svg");
+            if (input.type === "password") {
+                input.type = "text";
+                // 替换为闭眼 SVG（你可以自定义成其他图标）
+                svg.innerHTML = `
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                `;
+            } else {
+                input.type = "password";
+                // 替换为睁眼 SVG
+                svg.innerHTML = `
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                <line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                `;
+            }
+        }
+
+        function showPopup(type, text) {
+            let popup = document.getElementById("popup-message");
+            if (!popup) {
+                popup = document.createElement("div");
+                popup.id = "popup-message";
+                document.body.appendChild(popup);
+            }
+            popup.innerHTML = `<div class="popup ${type}">${text}</div>`;
+            popup.style.opacity = "1";
+            setTimeout(() => {
+                popup.style.opacity = "0";
+                setTimeout(() => popup.remove(), 500);
+            }, 3000);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById("register-form");
+            form.addEventListener("submit", function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+                showPopup("info", "请等待，正在注册中，请勿关闭或刷新界面");
+
+                fetch("{% url 'register' %}", {
+                    method: "POST",
+                    headers: {"X-CSRFToken": formData.get("csrfmiddlewaretoken")},
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    // 清空旧错误
+                    document.querySelectorAll(".error").forEach(div => div.innerHTML = "");
+
+                    if (data.success) {
+                        setTimeout(() => {
+                            showPopup("success", data.message);
+                            setTimeout(() => {
+                                window.location.href = data.redirect_url;
+                            }, 2000);
+                        }, 1000);
+                    } else {
+                        if (data.errors) {
+                            const isValidationError = Object.keys(data.errors).some(key => key !== "email");
+
+                            if (isValidationError) {
+                                // 关闭“请等待”弹窗
+                                const popup = document.getElementById("popup-message");
+                                if (popup) popup.remove();
+                                for (const [field, msg] of Object.entries(data.errors)) {
+                                    const errorDiv = document.querySelector(`.error[data-field="${field}"]`);
+                                    if (errorDiv) errorDiv.innerHTML = msg;
+                                }
+                            }
+                            else{
+                                const firstErrorMsg = Object.values(data.errors)[0];
+
+                                setTimeout(() => {
+                                    showPopup("error", firstErrorMsg);;
+                                }, 1000);
+
+                            }
+
+                        }
+                    }
+                });
+            });
+        });
+
+
+
+    </script>
+</head>
+<body>
+<div class="register-container">
+    <a href="/login/" class="back-btn" aria-label="返回登录">
+        <svg viewBox="0 0 24 24" class="arrow-icon">
+            <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </a>
+
+    <h2>学生注册</h2>
+
+    <form method="POST" id="register-form">
+        {% csrf_token %}
+
+        <label>学生用户名</label>
+        <input type="text" name="username" required>
+        <div class="error" data-field="username"></div>
+
+        <label>学号</label>
+        <input type="text" name="studentId" required>
+        <div class="error" data-field="studentId"></div>
+
+        <label>账户密码</label>
+        <div class="password-wrapper">
+            <div class="input-with-icon">   
+                <input type="password" id="password" name="password" required>
+                <span class="toggle">
+                    <span class="icon-btn" onclick="toggleVisibility('password', this)">
+                        <svg class="icon-eye" stroke="currentColor" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                        <line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    </span>
+                </span>
+            </div>
+        </div>
+        <div class="error" data-field="password"></div>
+
+        <label>重新输入密码</label>
+        <div class="password-wrapper">
+            <div class="input-with-icon">  
+                <input type="password" id="confirm_password" name="confirmPassword" required>
+                <span class="toggle">
+                    <span class="icon-btn" onclick="toggleVisibility('confirm_password', this)">
+                        <svg class="icon-eye" stroke="currentColor" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                        <line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                </span>
+            </div>  
+        </div>
+        <div class="error" data-field="confirm_password"></div>
+
+        <label>邮箱</label>
+        <input type="text" name="email" required>
+        <div class="error" data-field="email"></div>
+
+        <button type="submit" class="register-btn">注册</button>
+    </form>
+</div>
+</body>
+</html>

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block extra_css %}
+    <!-- 引入页面特定CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+{% endblock %}
+{% block title %}主页{% endblock %}
+{% block content %}
+<div class="special-page">
+        <header>
+        <h1>AI问答系统</h1>
+        <p>快来试试吧</p>
+<!--        <a href="/questionAnswer" class="cta-button">开始问答</a>-->
+        {% if request.session.userId %}
+            <a href="http://localhost:8501/?userId={{ request.session.userId }}" target="_blank" class="cta-button" style="text-decoration: none;">开始问答</a>
+<!--            <a href="/newQuestionAnswer" class="cta-button">开始问答</a>-->
+        {% else %}
+            <a href="/login" class="cta-button" style="text-decoration: none;">开始问答</a>
+        {% endif %}
+    </header>
+
+    <div class="container">
+        <div class="row">
+            <div class="profile">
+<!--                <img src="https://via.placeholder.com/150" alt="Minara's profile picture">-->
+                <h3>AI问答助手</h3>
+                <p>助你高效学习</p>
+            </div>
+
+            <div class="services">
+                <div class="service-item">
+                    <h4>个性化与自适应学习</h4>
+                    <p>AI问答引擎能够根据你的提问内容、知识背景和互动历史，提供高度个性化的解答和后续学习建议。它不会像固定教材一样“一刀切”，而是针对你的特定疑惑进行解答。</p>
+                </div>
+
+                <div class="service-item">
+                    <h4>即时性与便捷性</h4>
+                    <p>与传统寻求老师或同学帮助不同，AI助手随时随地可用。无论是深夜学习产生的灵感，还是周末复习遇到的难题，都能立刻得到响应，避免了问题积压和学习进程中断。</p>
+                </div>
+
+                <div class="service-item">
+                    <h4>安全无压力的学习环境</h4>
+                    <p>AI提供了一个完全无评判、无压力的环境，让你可以毫无顾忌地提出任何问题，这对于培养自信和好奇心至关重要。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

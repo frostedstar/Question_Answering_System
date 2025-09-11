@@ -1,0 +1,103 @@
+<!-- templates/login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+<div class="login-container">
+    {% if messages %}
+        <div id="popup-message">
+            {% for message in messages %}
+                {% if message.tags == "success" %}
+                    <div class="popup success">{{ message }}</div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <h2>用户登录</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        <input type="text" class="input-wide" name="username" placeholder="用户名" required
+            oninvalid="this.setCustomValidity('请输入用户名')"
+            oninput="this.setCustomValidity('')">
+        <div class="input-with-icon">
+            <input type="password" class="input-wide" id="password" name="password" placeholder="密码" required
+                oninvalid="this.setCustomValidity('请输入密码')"
+                oninput="this.setCustomValidity('')">
+            <span class="toggle">
+                    <span class="icon-btn" onclick="toggleVisibility('password', this)">
+                        <svg class="icon-eye" stroke="currentColor" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                        <line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    </span>
+                </span>
+        </div>
+
+        <div class="error">
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.tags == "error" %}
+                        {{ message }}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+        <button type="submit">登录</button>
+    </form>
+
+    <!-- <form action="/register/">
+        <button type="submit" class="register-btn">注册</button>
+    </form> -->
+    <p class="register-text">
+        没有账号？点击<a href="/register/" class="register-link">这里</a>注册
+    </p>
+
+</div>
+
+
+
+<script>
+  setTimeout(() => {
+    const popup = document.getElementById('popup-message');
+    if (popup) {
+      popup.style.opacity = '0';
+      setTimeout(() => popup.remove(), 500);
+    }
+  }, 3000); 
+
+  function toggleVisibility(inputId, toggleElement) {
+            const input = document.getElementById(inputId);
+            const svg = toggleElement.querySelector("svg");
+
+            if (input.type === "password") {
+                input.type = "text";
+                // 替换为闭眼 SVG（你可以自定义成其他图标）
+                svg.innerHTML = `
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                `;
+            } else {
+                input.type = "password";
+                // 替换为睁眼 SVG
+                svg.innerHTML = `
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                <line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                `;
+            }
+        }
+</script>
+
+
+</body>
+
+
+</html>

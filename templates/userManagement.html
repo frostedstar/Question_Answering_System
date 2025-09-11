@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/usermanagement.css' %}">
+{% endblock %}
+{% block title %}用户管理{% endblock %}
+
+{% block content %}
+    <div class="admin-container">
+        <h2>用户管理</h2>
+
+        <form method="get" class="per-page-form">
+            每页显示：
+            <select name="per_page" onchange="this.form.submit()">
+                {% for option in per_page_options %}
+                    <option value="{{ option }}" {% if per_page == option %}selected{% endif %}>{{ option }}</option>
+                {% endfor %}
+            </select> 个用户
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>用户名</th>
+                    <th>学号</th>
+                    <th>邮箱地址</th>
+                    <th>权限</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in page_users %}
+                <tr>
+                    <td>{{ user.user_name }}</td>
+                    <td>{{ user.student_id }}</td>
+                    <!-- <td>{{ user.student_id }}</td> -->
+
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <form action="{% url 'change_permission' user.user_id %}" method="post">{% csrf_token %}
+                            <select name="permission" onchange="this.form.submit()">
+                                <option value="student" {% if user.type == 'student' %}selected{% endif %}>student</option>
+                                <option value="manager" {% if user.type == 'manager' %}selected{% endif %}>manager</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td>
+                        <!-- <button class="study-btn" data-user-id="{{ user.id }}">查询学习情况</button> -->
+                        <!-- <a href="{% url 'wordCloud' %}?user_id={{ user.user_id }}" class="study-btn">查询学习情况</a> -->
+                        <form action="{% url 'wordCloud' %}" method="get" style="display:inline;">
+                            <input type="hidden" name="user_id" value="{{ user.user_id }}">
+                            <button type="submit" class="study-btn">查询学习情况</button>
+                        </form>
+                        <form action="{% url 'reset_password' user.id %}" method="post" style="display:inline;">{% csrf_token %}
+                            <button type="submit">重置密码</button>
+                        </form>
+                        <form action="{% url 'delete_user' user.id %}" method="post" style="display:inline;" onsubmit="return confirm('确认删除该用户？');">{% csrf_token %}
+                            <button type="submit" class="delete-btn">删除</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5">暂无用户</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            {% if page_number > 1 %}
+                <a href="?page=1&per_page={{ per_page }}">首页</a>
+                <a href="?page={{ page_number|add:'-1' }}&per_page={{ per_page }}">上一页</a>
+            {% endif %}
+
+            <span>第 {{ page_number }} 页 / 共 {{ total_pages }} 页</span>
+
+            {% if page_number < total_pages %}
+                <a href="?page={{ page_number|add:'1' }}&per_page={{ per_page }}">下一页</a>
+                <a href="?page={{ total_pages }}&per_page={{ per_page }}">尾页</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 学习情况弹窗 -->
+<!--    <div class="modal-overlay" id="studyModal">-->
+<!--        <div class="study-modal-content">-->
+<!--            <button class="close-modal">&times;</button>-->
+<!--            <div class="modal-header">-->
+<!--                <h3>用户学习情况</h3>-->
+<!--            </div>-->
+<!--            <div class="modal-body" id="studyModalContent">-->
+<!--                <div id="studyDataContainer">-->
+<!--                    &lt;!&ndash; 后续内容将通过JavaScript动态加载到这里 &ndash;&gt;-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+    <!-- <script>
+        // 弹窗控制逻辑
+        document.addEventListener('DOMContentLoaded', function() {
+             const modal = document.getElementById('studyModal');
+             const closeBtn = document.querySelector('.close-modal');
+             const studyBtns = document.querySelectorAll('.study-btn');
+            
+             // 打开弹窗
+             studyBtns.forEach(btn => {
+                 btn.addEventListener('click', function() {
+                     const userId = this.getAttribute('data-user-id');
+                     // 这里可以添加AJAX请求获取用户学习数据
+                     // 示例: fetchStudyData(userId);
+                     modal.style.display = 'flex';
+                 });
+             });
+            
+             // 关闭弹窗
+             closeBtn.addEventListener('click', function() {
+                 modal.style.display = 'none';
+             });
+            
+             // 点击蒙层关闭弹窗
+             modal.addEventListener('click', function(e) {
+                 if (e.target === modal) {
+                     modal.style.display = 'none';
+                 }
+         });
+        });
+    </script> -->
+{% endblock %}

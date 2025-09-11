@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/wordCloud.css' %}">
+{% endblock %}
+{% block title %}动态词云{% endblock %}
+
+{% block content %}
+<!-- <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>动态词云</title>
+  <link rel="stylesheet" href="{% static 'css/wordCloud.css' %}">
+
+</head> -->
+
+  <div id="wordcloud-container"></div>
+  <div id="tooltip"></div>
+
+  <!-- WordCloud2 库 -->
+  <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.2/src/wordcloud2.min.js"></script>
+  <script>
+    const container = document.getElementById('wordcloud-container');
+    const tooltip = document.getElementById('tooltip');
+
+    const userId = "{{ userId }}";
+
+    function fadeIn(element, duration=600) {
+      element.style.opacity = 0;
+      element.style.transition = `opacity ${duration}ms ease-in-out`;
+      void element.offsetWidth;
+      element.style.opacity = 1;
+    }
+
+    function generateWordCloud(data) {
+      container.innerHTML = '';
+      container.style.opacity = 0;
+
+      // ===== 动态调整参数 =====
+      const wordCount = data.length;
+      const maxValue = Math.max(...data.map(d => d[1]));
+
+      // 数据量越大 gridSize 越小，最多 20 最少 4
+      const gridSize = Math.max(10, Math.min(35, 60 - wordCount));
+
+      // 权重因子：根据最大值缩放，防止字太小或太大
+      const weightFactor = (size) => {
+        // 这里的 80 是最大字体像素，可根据需要调整
+        return (size / maxValue) * 160;
+      };
+
+      WordCloud(container, {
+        list: data,
+        gridSize: gridSize,
+        weightFactor: weightFactor,
+        fontFamily: 'Arial, sans-serif',
+        color: () => '#' + Math.floor(Math.random()*0xFFFFFF).toString(16).padStart(6, '0'),
+        backgroundColor: '#fff',
+        rotateRatio: 0.5,
+        rotationSteps: 2,
+        shuffle: true,
+        shape: 'circle',
+        ellipticity: 0.65,
+        // hover: function(item, dimension) {
+        //   if (!dimension) return;
+        //   tooltip.style.left = (dimension.x + dimension.w / 2) + 'px';
+        //   tooltip.style.top = (dimension.y) + 'px';
+        //   tooltip.textContent = `${item[0]} (权重: ${item[1]})`;
+        //   tooltip.style.display = 'block';
+        // },
+        mouseout: function() {
+          tooltip.style.display = 'none';
+        },
+        // click: function(item) {
+        //   alert(`你点击了: ${item[0]}\n权重: ${item[1]}`);
+        // }
+      });
+
+      setTimeout(() => fadeIn(container, 600), 50);
+    }
+
+    fetch(`/wordCloudData/${userId}/`)
+      .then(response => response.json())
+      .then(data => {
+        const listData = data.map(item => [item.name, item.value]);
+        generateWordCloud(listData);
+      })
+      .catch(err => {
+        console.error("词云数据加载失败：", err);
+      });
+  </script>
+
+{% endblock %}
