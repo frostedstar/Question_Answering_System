@@ -57,11 +57,6 @@
         }
 
         /* 内容区域 - 限定在.base-app下 */
-        /* .base-app .content { */
-            /* padding: 20px; */
-            /* flex: 1
-        } */
-
         .base-app .content {
             flex: 1;
             padding-top: 60px; /* 避开固定导航栏的高度 */
@@ -127,13 +122,11 @@
             background-color: #5a6268;
         }
 
-
         /* 动画 */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-
 
         #confirm-popup-message {
             position: fixed;
@@ -156,6 +149,62 @@
 
         .confirm-popup.error { background-color: #f44336; }
         .confirm-popup.info { background-color: #2196F3; }
+
+        /* 移动端适配样式 - 新增 */
+        .hamburger-menu {
+            display: none;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            z-index: 1001;
+        }
+
+        .hamburger-menu span {
+            width: 100%;
+            height: 3px;
+            background-color: #333;
+            border-radius: 2px;
+            transition: all 0.3s linear;
+        }
+
+        /* 媒体查询 - 移动端适配 */
+        @media screen and (max-width: 768px) {
+            .hamburger-menu {
+                display: flex;
+            }
+
+            .nav-buttons {
+                position: fixed;
+                top: 60px;
+                left: 0;
+                width: 100%;
+                flex-direction: column;
+                background-color: #fff;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                padding: 20px;
+                gap: 10px;
+                transform: translateY(-100%);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+            }
+
+            .nav-buttons.active {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .nav-button {
+                width: 100%;
+                text-align: center;
+            }
+        }
     </style>
     <!-- 预留CSS扩展块 -->
     {% block extra_css %}{% endblock %}
@@ -165,7 +214,12 @@
     <!-- 导航栏 -->
     <div class="navbar">
         <div class="site-name">AI问答系统</div>
-        <div class="nav-buttons">
+        <button class="hamburger-menu" id="hamburgerMenu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-buttons" id="navButtons">
             {% if request.session.type == 'student' %}
                 <a href="{% url 'index' %}" class="nav-button">主页</a>
                 <a href="{% url 'learningPath' %}" onclick="baseShowPopup('success', '正在生成学习路径，生成时间与提问记录长度有关，请耐心等待')" class="nav-button">学习路径可视化</a>
@@ -186,11 +240,7 @@
         {% block content %}
         <!-- 子模板内容将在这里插入 -->
         {% endblock %}
-
     </div>
-
-
-
 
     <!-- 退出登录确认弹窗 -->
     <div id="logoutModal" class="modal">
@@ -202,55 +252,71 @@
             </div>
         </div>
     </div>
-    </div>
+</div>
 
-    <script>
-        // 获取DOM元素
-        const logoutBtn = document.getElementById('logoutBtn');
-        const logoutModal = document.getElementById('logoutModal');
-        const confirmLogout = document.getElementById('confirmLogout');
-        const cancelLogout = document.getElementById('cancelLogout');
+<script>
+    // 获取DOM元素
+    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutModal = document.getElementById('logoutModal');
+    const confirmLogout = document.getElementById('confirmLogout');
+    const cancelLogout = document.getElementById('cancelLogout');
+    const hamburgerMenu = document.getElementById('hamburgerMenu');
+    const navButtons = document.getElementById('navButtons');
 
-        // 点击退出按钮显示弹窗
-        logoutBtn.addEventListener('click', function() {
-            logoutModal.style.display = 'block';
-        });
+    // 点击退出按钮显示弹窗
+    logoutBtn.addEventListener('click', function() {
+        logoutModal.style.display = 'block';
+    });
 
-        // 点击确定按钮跳转到登录页面
-        confirmLogout.addEventListener('click', function() {
-            window.location.href = "{% url 'login' %}";
-        });
+    // 点击确定按钮跳转到登录页面
+    confirmLogout.addEventListener('click', function() {
+        window.location.href = "{% url 'login' %}";
+    });
 
-        // 点击取消按钮关闭弹窗
-        cancelLogout.addEventListener('click', function() {
+    // 点击取消按钮关闭弹窗
+    cancelLogout.addEventListener('click', function() {
+        logoutModal.style.display = 'none';
+    });
+
+    // 点击弹窗外部关闭弹窗
+    window.addEventListener('click', function(event) {
+        if (event.target === logoutModal) {
             logoutModal.style.display = 'none';
-        });
-
-        // 点击弹窗外部关闭弹窗
-        window.addEventListener('click', function(event) {
-            if (event.target === logoutModal) {
-                logoutModal.style.display = 'none';
-            }
-        });
-
-
-        // 这两个函数就是实现弹窗功能的函数，fetch函数向后端目标函数的url发请求！！！，同时记得改css,添加confirm-popup-message，confirm-popup相关的css内容
-
-        function baseShowPopup(type, text) {
-            let popup = document.getElementById("confirm-popup-message");
-            if (!popup) {
-                popup = document.createElement("div");
-                popup.id = "confirm-popup-message";
-                document.body.appendChild(popup);
-            }
-            popup.innerHTML = `<div class="confirm-popup ${type}">${text}</div>`;
-            popup.style.opacity = "1";
-            setTimeout(() => {
-                popup.style.opacity = "0";
-                setTimeout(() => popup.remove(), 500);
-            }, 60000);
         }
-    </script>
+    });
+
+    // 汉堡菜单点击事件 - 新增
+    hamburgerMenu.addEventListener('click', function() {
+        navButtons.classList.toggle('active');
+        hamburgerMenu.classList.toggle('active');
+    });
+
+    // 点击导航链接后关闭菜单（移动端）
+    document.querySelectorAll('.nav-button').forEach(button => {
+        button.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                navButtons.classList.remove('active');
+                hamburgerMenu.classList.remove('active');
+            }
+        });
+    });
+
+    // 这两个函数就是实现弹窗功能的函数
+    function baseShowPopup(type, text) {
+        let popup = document.getElementById("confirm-popup-message");
+        if (!popup) {
+            popup = document.createElement("div");
+            popup.id = "confirm-popup-message";
+            document.body.appendChild(popup);
+        }
+        popup.innerHTML = `<div class="confirm-popup ${type}">${text}</div>`;
+        popup.style.opacity = "1";
+        setTimeout(() => {
+            popup.style.opacity = "0";
+            setTimeout(() => popup.remove(), 500);
+        }, 60000);
+    }
+</script>
 
 </body>
 </html>
