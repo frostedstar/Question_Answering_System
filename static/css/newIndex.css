@@ -1,0 +1,248 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+header {
+  position: fixed;
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  padding: 0 2vw;
+  background-color: rgba(67, 67, 67, 0.6);
+  z-index: 1000;
+}
+h1 { 
+  flex-shrink: 0;
+  width: 15vw;
+  max-width: 160px;
+  min-width: 100px;
+  height: 60px;
+  background: url("../images/mugo-logo_write.png") left center / contain no-repeat;
+  background-position: center;
+  text-indent: -9999px;
+}
+
+nav ul{ 
+  position: absolute;
+  right: 6vw;
+  top: 50%;              /* 顶部到 header 中点 */
+  transform: translateY(-50%);
+  line-height: 60px;
+}
+
+nav li {
+  display: inline;
+  margin-left: 2vw;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+.menu {
+  display: none;   /* 默认隐藏，小屏幕显示 */
+  font-size: 35px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: auto; /* 保持menu在右 */
+  margin-right: 20px; 
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  nav ul {
+    display: none;         /* 小屏幕时默认隐藏导航 */
+    flex-direction: column;
+    position: absolute;
+    top: 80px;
+    right: 0;
+    background: rgba(67,67,67,0.9);
+    width: 150px;
+    padding: 10px;
+    z-index: 999;
+  }
+
+  nav ul.active {
+    display: flex;         /* 点击按钮后显示 */
+  }
+  nav li {
+    margin: 5px;     /* 每个菜单项上下间距 */
+  }
+
+  .menu {
+    display: block;        /* 小屏幕时显示汉堡按钮 */
+  }
+  h1 {
+    margin-right: auto; /* 保持logo在左 */
+  }
+}
+.news{
+    background-color: antiquewhite;
+    height: 100vh;
+    width: 100%;
+    background-image: url(../images/background.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;   
+}
+.news h2{
+    font-size: 90px;
+    font-family: 'Brandon';
+    font-weight: 800;
+    margin-top: 60px;
+    margin-bottom: 4px; /* 缩小 h2 底部的间距 */
+    letter-spacing: 0.5px
+    display: inline-block;  /* 改为行内块元素 */
+    transform: scaleX(1.08);  /* 水平压缩 */
+}
+.news p{
+    color: #ffffff;
+    font-size: 25px;
+    font-family: '三极青岚楷书';
+    margin: 4px 0 25px 0;
+}
+.news a{
+    display: inline-block;
+    color: rgb(0, 0, 0);
+    background-color: #ffffff;  
+    text-decoration: none;
+    border: white solid 1px;                /* 边框 */
+    padding: 12px 28px;
+    font-size: 20px;
+    font-weight: bold; 
+    border-radius: 16px;                    /* 圆角边框，让按钮更柔和 */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* 添加过渡动画：背景色和缩放效果更平滑 */
+}
+.news a:hover{
+    transform: scale(1.05);      /* 悬停时放大一点 */
+}
+.slogan{
+    background-color: #485652;
+    height:180px;
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    justify-content: center;
+    color: rgb(255, 255, 255);
+    font-family: '三极青岚楷书';
+}
+.slogan h3{
+    font-size: 30px;
+    font-weight: bold;
+    margin: 8px 0 8px 0;
+    
+}
+.slogan p{
+    font-size: 16px;
+    line-height: 1.6em;
+    margin-top: 8px;
+    margin-bottom: 8px;  /* 控制标题和段落之间的间距 */
+}
+footer{
+    background-color: black;
+    height:40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #B7B7B7;
+    font-size: 12px;
+}
+.product{
+    display: flex;
+    background-color: #ffffff;
+    align-items: center;
+    justify-content: space-between;
+    padding: 100px 180px 80px;
+}
+.product div{
+    width: 300px;
+    text-align: center;
+}
+.product img{
+    width: 100%;
+    border-radius: 10px;
+}
+.product h4{
+    font-size: 20px;
+    margin: 20px 0;
+}
+.product p{
+    font-size: 14px;
+    line-height: 1.6em;
+}
+.newsletter {
+    background-color: #485652;
+    padding: 30px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;  /* 垂直居中 */
+    color: white;
+}
+.newsletter p {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+/*变更表单提示文字的颜色*/
+input::placeholder{
+    color: #DDDDDD;
+}
+input:focus{
+    outline: none;
+    border-color: #E0E9A3;
+}
+.menu{
+    display: none;
+}
+/* 响应式设计 */
+@media screen and (max-width:768px){
+    header ul{
+        display: none;
+    }
+    .news h2{
+        font-size: 45px;
+    }
+    .news p{
+        font-size: 16px;
+    }
+    .slogan h3{
+        font-size: 24px;
+    }
+    .slogan p{
+        font-size: 14px;
+    }
+    .news a{
+    padding: 10px 24px;
+    font-size: 16px;
+    border-radius: 14px;   
+    }              
+    .menu{
+        display: block;
+        background-color: transparent;
+        color: white;
+        font-size: 35px;
+        top: 20px;
+        border: none;
+        cursor: pointer;
+    }
+    .product{
+        flex-direction: column;
+        padding: 60px 0;
+    }
+    .product div{
+        margin-bottom: 30px;
+    }
+}
