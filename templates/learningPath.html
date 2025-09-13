@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Graph 渲染示例{% endblock %}
+{% block title %}学习路径{% endblock %}
 
 {% block extra_css %}
   <style>
@@ -15,13 +15,15 @@
 {% endblock %}
 
 {% block content %}
-  <h2>学习路径</h2>
-
-  <!-- Mermaid 图表容器 -->
-  <div class="mermaid">
-    {{ htmlContent|safe }}
-  </div>
-
+  <!-- <h2>学习路径</h2> -->
+    {% if htmlContent %}
+      <!-- Mermaid 图表容器 -->
+      <div class="mermaid">
+          {{ htmlContent|safe }}
+      </div>
+    {% else %}
+      该用户暂无历史提问记录，无法生成学习路径
+    {% endif %}
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <script>
     // 延迟 Mermaid 初始化，确保页面完全加载

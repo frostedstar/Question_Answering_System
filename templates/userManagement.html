@@ -48,14 +48,22 @@
                     <td>
                         <!-- <button class="study-btn" data-user-id="{{ user.id }}">查询学习情况</button> -->
                         <!-- <a href="{% url 'wordCloud' %}?user_id={{ user.user_id }}" class="study-btn">查询学习情况</a> -->
+                        <form action="{% url 'studyReport' %}" method="get" style="display:inline;">
+                            <input type="hidden" name="userId" value="{{ user.user_id }}">
+                            <button type="submit" class="study-btn">分析报告</button>
+                        </form>
+                        <form action="{% url 'learningPath' %}" method="get" style="display:inline;">
+                            <input type="hidden" name="userId" value="{{ user.user_id }}">
+                            <button type="submit" onclick="baseShowPopup('success', '正在生成学习路径，生成时间与提问记录长度有关，请耐心等待')" class="study-btn">学习路径</button>
+                        </form>
                         <form action="{% url 'wordCloud' %}" method="get" style="display:inline;">
                             <input type="hidden" name="user_id" value="{{ user.user_id }}">
-                            <button type="submit" class="study-btn">查询学习情况</button>
+                            <button type="submit" class="study-btn">词云分析</button>
                         </form>
-                        <form action="{% url 'reset_password' user.id %}" method="post" style="display:inline;">{% csrf_token %}
+                        <form action="{% url 'reset_password' user.user_id %}" method="post" style="display:inline;">{% csrf_token %}
                             <button type="submit">重置密码</button>
                         </form>
-                        <form action="{% url 'delete_user' user.id %}" method="post" style="display:inline;" onsubmit="return confirm('确认删除该用户？');">{% csrf_token %}
+                        <form action="{% url 'delete_user' user.user_id %}" method="post" style="display:inline;" onsubmit="return confirm('确认删除该用户？');">{% csrf_token %}
                             <button type="submit" class="delete-btn">删除</button>
                         </form>
                     </td>

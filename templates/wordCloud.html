@@ -51,31 +51,55 @@
         return (size / maxValue) * 160;
       };
 
+      
+      // 蓝色调
+      function getBlueShade() {
+        const blue = 180 + Math.floor(Math.random() * 75); // 180~255
+        const green = Math.floor(Math.random() * 120);     // 0~120
+        const red = Math.floor(Math.random() * 80);        // 0~80
+        return `rgb(${red}, ${green}, ${blue})`;
+      }
+
+      // 暖色调（红橙黄）
+      function getWarmShade() {
+        const red = 200 + Math.floor(Math.random() * 55);  // 200~255
+        const green = 80 + Math.floor(Math.random() * 150); // 80~230
+        const blue = Math.floor(Math.random() * 50);       // 0~50
+        return `rgb(${red}, ${green}, ${blue})`;
+      }
+
+      // 绿色系
+      function getGreenShade() {
+        const green = 150 + Math.floor(Math.random() * 105); // 150~255
+        const red = Math.floor(Math.random() * 120);         // 0~120
+        const blue = Math.floor(Math.random() * 100);        // 0~100
+        return `rgb(${red}, ${green}, ${blue})`;
+      }
+
+      function randomColor(){
+        const type = Math.floor(Math.random() * 3) + 1
+          if (type === 1) return getBlueShade();
+          if (type === 2) return getWarmShade();
+          return getGreenShade();
+      }
+
+
+      
       WordCloud(container, {
         list: data,
         gridSize: gridSize,
         weightFactor: weightFactor,
         fontFamily: 'Arial, sans-serif',
-        color: () => '#' + Math.floor(Math.random()*0xFFFFFF).toString(16).padStart(6, '0'),
+        color: randomColor,
         backgroundColor: '#fff',
-        rotateRatio: 0.5,
+        rotateRatio: 0,
         rotationSteps: 2,
         shuffle: true,
         shape: 'circle',
         ellipticity: 0.65,
-        // hover: function(item, dimension) {
-        //   if (!dimension) return;
-        //   tooltip.style.left = (dimension.x + dimension.w / 2) + 'px';
-        //   tooltip.style.top = (dimension.y) + 'px';
-        //   tooltip.textContent = `${item[0]} (权重: ${item[1]})`;
-        //   tooltip.style.display = 'block';
-        // },
         mouseout: function() {
           tooltip.style.display = 'none';
         },
-        // click: function(item) {
-        //   alert(`你点击了: ${item[0]}\n权重: ${item[1]}`);
-        // }
       });
 
       setTimeout(() => fadeIn(container, 600), 50);

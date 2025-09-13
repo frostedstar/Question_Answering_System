@@ -1,3 +1,10 @@
 from django.db import models
 
-# Create your models here.
+class LearningPath(models.Model):
+    id = models.AutoField(primary_key=True)
+    user_id = models.IntegerField()
+    graph = models.TextField()
+    graph_time = models.DateTimeField()
+
+    class Meta:
+        db_table = 'learning_path'  

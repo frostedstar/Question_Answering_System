@@ -112,7 +112,7 @@
     <form method="POST" id="register-form">
         {% csrf_token %}
 
-        <label>学生用户名</label>
+        <label>用户名</label>
         <input type="text" name="username" required>
         <div class="error" data-field="username"></div>
 
@@ -123,7 +123,7 @@
         <label>账户密码</label>
         <div class="password-wrapper">
             <div class="input-with-icon">   
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" required placeholder="包含大写字母、小写字母、数字，长度8~20位">
                 <span class="toggle">
                     <span class="icon-btn" onclick="toggleVisibility('password', this)">
                         <svg class="icon-eye" stroke="currentColor" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -140,7 +140,7 @@
         <label>重新输入密码</label>
         <div class="password-wrapper">
             <div class="input-with-icon">  
-                <input type="password" id="confirm_password" name="confirmPassword" required>
+                <input type="password" id="confirm_password" name="confirmPassword" required placeholder="包含大写字母、小写字母、数字，长度8~20位">
                 <span class="toggle">
                     <span class="icon-btn" onclick="toggleVisibility('confirm_password', this)">
                         <svg class="icon-eye" stroke="currentColor" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
