@@ -4,22 +4,52 @@
 
 {% block extra_css %}
   <style>
-    .mermaid {
+    .mermaid-container {
       width: 100%;
-      height: 500px;  /* 可以调整高度来适应你的需求 */
-      min-height: 500px;
-      max-width: 100%;
-      margin: 0 auto;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+    }
+    
+    .mermaid-container:active {
+      cursor: grabbing;
+    }
+    
+    .mermaid {
+      width: max-content;
+      min-width: 100%;
+      height: max-content;
+      min-height: 100%;
+      transform-origin: 0 0;
+      transition: transform 0.1s ease;
+    }
+    
+    .zoom-hint {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
   </style>
 {% endblock %}
 
 {% block content %}
-  <!-- <h2>学习路径</h2> -->
     {% if htmlContent %}
       <!-- Mermaid 图表容器 -->
-      <div class="mermaid">
-          {{ htmlContent|safe }}
+      <div class="mermaid-container" id="mermaid-container">
+        <div class="mermaid" id="mermaid-chart">
+            {{ htmlContent|safe }}
+        </div>
+        <div class="zoom-hint" id="zoom-hint">Ctrl+滚轮缩放 | 拖动移动</div>
       </div>
     {% else %}
       该用户暂无历史提问记录，无法生成学习路径
@@ -38,6 +68,93 @@
           direction: 'LR'   // 设置横向排列：从左到右（Left to Right）
         }
       });
+      
+      // 添加缩放和拖动功能
+      const mermaidContainer = document.getElementById('mermaid-container');
+      const mermaidChart = document.getElementById('mermaid-chart');
+      const zoomHint = document.getElementById('zoom-hint');
+      
+      if (mermaidContainer && mermaidChart) {
+        let scale = 1;
+        let posX = 0;
+        let posY = 0;
+        let isDragging = false;
+        let startX, startY;
+        const minScale = 0.5;
+        const maxScale = 3;
+        const zoomStep = 0.1;
+        let hintTimeout;
+        
+        // 更新变换
+        function updateTransform() {
+          mermaidChart.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+          
+          // 显示缩放提示
+          if (zoomHint) {
+            zoomHint.textContent = `缩放: ${Math.round(scale * 100)}% | 拖动移动`;
+            zoomHint.style.opacity = 1;
+            
+            // 2秒后隐藏提示
+            clearTimeout(hintTimeout);
+            hintTimeout = setTimeout(() => {
+              zoomHint.style.opacity = 0;
+            }, 2000);
+          }
+        }
+        
+        // 滚轮缩放事件
+        mermaidContainer.addEventListener('wheel', function(e) {
+          if (e.ctrlKey) {
+            e.preventDefault();
+            
+            // 确定缩放方向
+            if (e.deltaY < 0 && scale < maxScale) {
+              // 滚轮向上，放大
+              scale += zoomStep;
+            } else if (e.deltaY > 0 && scale > minScale) {
+              // 滚轮向下，缩小
+              scale -= zoomStep;
+            }
+            
+            updateTransform();
+          }
+        });
+        
+        // 鼠标拖动事件
+        mermaidContainer.addEventListener('mousedown', function(e) {
+          isDragging = true;
+          startX = e.clientX - posX;
+          startY = e.clientY - posY;
+          mermaidContainer.style.cursor = 'grabbing';
+        });
+        
+        document.addEventListener('mousemove', function(e) {
+          if (!isDragging) return;
+          
+          posX = e.clientX - startX;
+          posY = e.clientY - startY;
+          
+          updateTransform();
+        });
+        
+        document.addEventListener('mouseup', function() {
+          isDragging = false;
+          mermaidContainer.style.cursor = 'grab';
+        });
+        
+        // 防止拖动时选中文本
+        mermaidContainer.addEventListener('selectstart', function(e) {
+          if (isDragging) e.preventDefault();
+        });
+        
+        // 初始显示提示
+        if (zoomHint) {
+          zoomHint.style.opacity = 1;
+          hintTimeout = setTimeout(() => {
+            zoomHint.style.opacity = 0;
+          }, 3000);
+        }
+      }
     });
   </script>
 {% endblock %}
