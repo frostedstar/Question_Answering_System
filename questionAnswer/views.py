@@ -269,6 +269,7 @@ def get_study_report_ajax(request):
                 study_report = StudyReport.objects.filter(id=reportId).first()
                 if study_report:
                     studyReportContent = markDownToHTML(study_report.study_report)
+                    print(studyReportContent)
                     selectedStudyReportTime = study_report.study_report_time.strftime('%Y-%m-%d %H:%M:%S')
                     return JsonResponse({
                         'status': 'success',
@@ -338,7 +339,7 @@ import bleach
 ALLOWED_TAGS = list(bleach.sanitizer.ALLOWED_TAGS) + [
     'p', 'pre', 'code', 'blockquote', 'ul', 'ol', 'li',
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'img', 'table', 'thead', 'tbody', 'tr', 'th', 'td','hr'
+    'img', 'table', 'thead', 'tbody', 'tr', 'th', 'td','hr', 'br'
 ]
 
 ALLOWED_ATTRIBUTES = {

@@ -117,6 +117,7 @@ def learningPathPrompt(lastGraph, QuestionContent):
         {QuestionContent}\n\n
         请将该学生新增的问答记录整合到原来的graph LR语句中。\n
         除了graph LR语句之外，不要回复任何其他信息。\n
+        注意：在graph LR语句的节点名称中，如果需要标点符号，请使用中文的标点符号！！！\n
         """
     else:
         return f"""你是一名负责帮助木结构建筑相关专业学生的智能学习分析助手，能将学生的以往的问答记录转换为思维导图，该思维导图以graph LR语句的形式输出。\n
@@ -124,6 +125,7 @@ def learningPathPrompt(lastGraph, QuestionContent):
         {QuestionContent}\n\n
         请将该学生的问答记录转换为graph LR语句。\n
         除了graph LR语句之外，不要回复任何其他信息。\n
+        注意：在graph LR语句的节点名称中，如果需要标点符号，请使用中文的标点符号！！！\n
         """
 
 
