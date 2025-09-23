@@ -130,22 +130,6 @@ def learningPathPrompt(lastGraph, QuestionContent):
 
 
 def learningPathGraph(request):
-    # userInformation = getUserInformation(request)
-    # userId =  request.GET.get('user_id', None)
-    # if userId:
-    #     QuestionContent = getQuestionContentByUserId(userId)
-    #     prompt = learningPathPrompt(QuestionContent)
-    #     answer = getAnswer(prompt)
-    #     print(answer)
-    # elif userInformation and ('userId' in userInformation) and userInformation['userId']:
-    #     userId = userInformation['userId']
-    #     QuestionContent = getQuestionContentByUserId(userId)
-    #     prompt = learningPathPrompt(QuestionContent)
-    #     answer = getAnswer(prompt)
-    #     print(answer)
-    # else:
-    #     print('用户不存在')
-    # return render(request, 'learningPath.html', {'html_content': answer})
     userId = request.GET.get('userId', None)
     if not(userId):
         userInformation = getUserInformation(request)
@@ -160,6 +144,7 @@ def learningPathGraph(request):
     if QuestionContent:
         prompt = learningPathPrompt(lastGraph, QuestionContent)
         answer = getAnswer(prompt)
+        answer = removeWrongCharacters(answer)
         print('answer:')
         print(answer)
         newLearningPath = LearningPath(
@@ -176,3 +161,7 @@ def learningPathGraph(request):
             return render(request, 'learningPath.html')
 
 
+def removeWrongCharacters(graph):
+    # 移除无法处理的字符
+    cleanedGraph = graph.replace('\\n', '\n').replace('|', '，')
+    return cleanedGraph
