@@ -54,4 +54,6 @@ urlpatterns = [
     # path('newQuestionAnswer/', questionAnswerViews.toQuestionAnswer, name = 'newQuestionAnswerViews'),
     path('createStudyReport/', questionAnswerViews.createStudyReport, name='createStudyReport'),
     path('get-study-report-ajax/', questionAnswerViews.get_study_report_ajax, name='get_study_report_ajax'),
+    path('getLearingPathById/', learningPathViews.getLearingPathById, name='getLearingPathById'),
+    path('recreateLearningPath/', learningPathViews.recreateLearingPathByIndex, name='recreateLearningPath'),
 ]

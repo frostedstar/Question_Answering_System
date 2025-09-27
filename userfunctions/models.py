@@ -1,6 +1,6 @@
 from django.db import models
 
-class UserInfoBaseModel(models.Model):
+class BaseUserInfo(models.Model):
     id = models.AutoField(primary_key=True)
     user_name = models.TextField()
     student_id = models.TextField()
@@ -16,14 +16,14 @@ class UserInfoBaseModel(models.Model):
         return self.user_name
 
 
-class Userinfo(UserInfoBaseModel):
+class Userinfo(BaseUserInfo):
     class Meta:
         db_table = '"User_info"'  # 指定数据库表名
         managed = False   # 告诉Django不要管理此表的创建和修改
 
 
 
-class ReadUserInfo(UserInfoBaseModel):
+class ReadUserInfo(BaseUserInfo):
     user_id = models.IntegerField()
 
     class Meta:
